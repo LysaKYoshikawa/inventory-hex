@@ -1,0 +1,146 @@
+openapi: 3.0.3
+info:
+  title: Sistema de Gestão de Estoque Distribuído - Protótipo
+  description: |
+    Mini contrato da API para gerenciamento de estoque em ambiente distribuído.  
+    Essa API é um protótipo simplificado que simula persistência em arquivos JSON/CSV ou banco em memória.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080/api
+    description: Servidor local de desenvolvimento
+
+paths:
+  /estoque:
+    get:
+      summary: Listar itens do estoque
+      description: Retorna todos os itens disponíveis no estoque
+      responses:
+        '200':
+          description: Lista de itens de estoque
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ItemEstoque'
+
+    post:
+      summary: Adicionar novo item ao estoque
+      description: Cria um novo item de inventário
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ItemEstoqueInput'
+      responses:
+        '201':
+          description: Item criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemEstoque'
+
+  /estoque/{id}:
+    get:
+      summary: Consultar item específico do estoque
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Detalhes do item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemEstoque'
+        '404':
+          description: Item não encontrado
+
+    put:
+      summary: Atualizar informações de um item do estoque
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ItemEstoqueInput'
+      responses:
+        '200':
+          description: Item atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemEstoque'
+        '404':
+          description: Item não encontrado
+
+  /estoque/{id}/reservar:
+    post:
+      summary: Reservar item no estoque
+      description: Reserva uma quantidade de item no estoque, garantindo consistência no inventário
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                quantidade:
+                  type: integer
+                  example: 2
+      responses:
+        '200':
+          description: Reserva efetuada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemEstoque'
+        '400':
+          description: Quantidade insuficiente em estoque
+        '404':
+          description: Item não encontrado
+
+components:
+  schemas:
+    ItemEstoque:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "123"
+        nome:
+          type: string
+          example: "Notebook Dell Inspiron"
+        quantidade:
+          type: integer
+          example: 50
+        reservado:
+          type: integer
+          example: 5
+
+    ItemEstoqueInput:
+      type: object
+      properties:
+        nome:
+          type: string
+          example: "Mouse sem fio"
+        quantidade:
+          type: integer
+          example: 100
